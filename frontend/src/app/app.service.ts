@@ -9,7 +9,7 @@ export class AppService {
 
     constructor(private http: HttpClient) {
         this.http.get(environment.ssoUrl + '/user').subscribe(response => {
-            if (response['name']) {
+            if (response != null && response['name']) {
                 this.authenticated = true;
             } else {
                 this.authenticated = false;

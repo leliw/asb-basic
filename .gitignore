@@ -1,1 +1,5 @@
-/.metadata/
+.metadata/
+.vscode/
+.settings/
+.project
+target/

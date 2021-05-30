@@ -24,7 +24,6 @@ public class BackendApplication {
 	@GetMapping("/sso/user")
 	@ResponseBody
 	public Principal user(Principal user) {
-		System.out.println(user);
 		return user;
 	}
 	
@@ -38,12 +37,13 @@ public class BackendApplication {
 				.logout()
 				.logoutUrl("/sso/logout")
 			.and()
-				.authorizeRequests().antMatchers("/index.html", "/", "/home", "/login").permitAll()
-				.anyRequest().authenticated()
+				.authorizeRequests().antMatchers("/sso", "/api").authenticated()
+				.anyRequest().permitAll()
 			.and()
 				.csrf()
 				.ignoringAntMatchers ("/login","/logout")
 				.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
 		}
 	}
+	
 }
