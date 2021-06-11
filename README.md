@@ -81,7 +81,7 @@ ng serve --open
 
 Create Spring Boot project with Spring Web and Spring Security dependencies. You can use https://start.spring.io/.
 
-[[images/SpringInitializr-basic.png]]
+<img src="https://github.com/leliw/asb-basic/blob/main/images/SpringInitializr-basic.png?raw=true" />
 
 Save backend.zip in parent folder for both projects and unzip it.
 
