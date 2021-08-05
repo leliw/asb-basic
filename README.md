@@ -1,6 +1,6 @@
 # Angular - Spring Boot - Basic
 
-It's a simple full stack project with Angular frontend and Java - Sprign Boot backend. You can use it as a template for your own projects.
+It's a simple full stack project with Angular frontend and Java - Spring Boot backend. You can use it as a template for your own projects.
 
 ## Development environment configuration
 
@@ -104,7 +104,7 @@ Using generated security password: 7e1f5805-99b4-4aba-af2e-db2e10deb8b9
 
 ## Development environment
 
-In production use there will be one server, but in development two separate serwers are more convenient. As you can see before, there are two saparate servers working on ports 4200 (Angular) and 8080 (Spring Boot). In that case there is a problem with CORS (Cross-Origin Resource Sharing) and CSRF (Cross-site request forgery) protection. It is possible to configure Spring Boot Server to bypass these protections, but for me it is easier to use NGINX serwer in Docker container as a proxy.
+In production use there will be one server, but in development two separate servers are more convinient. As you can see before, there are two saparate servers working on ports 4200 (Angular) and 8080 (Spring Boot). In that case there is a problem with CORS (Cross-Origin Resource Sharing) and CSRF (Cross-site request forgery) protection. It is possible to configure Spring Boot Server to bypass these protections, but for me it is easier to use NGINX serwer in Docker container as a proxy.
 
 There are configured three diffrent locations:
 * / - Angular code and resources
@@ -296,3 +296,87 @@ export class XhrInterceptor implements HttpInterceptor {
 })
 export class AppModule { }
 ```
+## All together in production environment
+
+In production environment there is onyl one server. Angular resources are served by Java code as static files.
+
+* Bilding Angular source by Maven. Add pom.xml file in frontend folder with frontend-maven-plugin plugin
+```xml
+            <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+                <version>1.7.6</version>
+                <configuration>
+                    <workingDirectory>./</workingDirectory>
+                    <nodeVersion>v13.12.0</nodeVersion>
+                    <npmVersion>6.14.4</npmVersion>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>install node and npm</id>
+                        <goals>
+                            <goal>install-node-and-npm</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>npm install</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>npm run build</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>run build</arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+```
+
+* Add copying Angular files do static floder in backend/pom.xml
+```xml
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.4.2</version>
+				<executions>
+					<execution>
+						<id>default-copy-resources</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<overwrite>false</overwrite>
+							<outputDirectory>target/classes/static</outputDirectory>
+							<resources>
+								<resource>
+									<directory>../frontend/dist/frontend</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+```
+
+* Parent pom.xml file in main folder apoint both projects
+```xml
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>frontend</module>
+    <module>backend</module>
+  </modules>
+```
+
+Then build and (stop docker first) run built jar.
+```bash
+mvn clean install
+java -jar backend/target/backend-0.0.1-SNAPSHOT.jar
+```
+Application is available at http://localhost:8080/.
