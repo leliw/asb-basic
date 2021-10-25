@@ -8,7 +8,7 @@ Install node from https://nodejs.org/.
 
 ```
 $ node --version
-v14.17.0
+v14.18.1
 ```
 
 Upgrade npm and install Angular CLI
@@ -22,7 +22,6 @@ Check ng command
 
 ```
 $ ng version
-
      _                      _                 ____ _     ___
     / \   _ __   __ _ _   _| | __ _ _ __     / ___| |   |_ _|
    / △ \ | '_ \ / _` | | | | |/ _` | '__|   | |   | |    | |
@@ -31,9 +30,9 @@ $ ng version
                 |___/
 
 
-Angular CLI: 12.0.3
-Node: 14.17.0
-Package Manager: npm 7.15.1
+Angular CLI: 12.2.11
+Node: 14.18.1
+Package Manager: npm 8.1.1
 OS: win32 x64
 
 Angular:
@@ -41,11 +40,15 @@ Angular:
 
 Package                      Version
 ------------------------------------------------------
-@angular-devkit/architect    0.1200.3 (cli-only)
-@angular-devkit/core         12.0.3 (cli-only)
-@angular-devkit/schematics   12.0.3 (cli-only)
-@schematics/angular          12.0.3 (cli-only)
+@angular-devkit/architect    0.1202.11 (cli-only)
+@angular-devkit/core         12.2.11 (cli-only)
+@angular-devkit/schematics   12.2.11 (cli-only)
+@schematics/angular          12.2.11 (cli-only)
 ```
+
+I use also:
+- Visual Studio Code: https://code.visualstudio.com/download 
+- Eclipce IDE https://www.eclipse.org/downloads/
 
 ## Generate standard projects
 
@@ -63,14 +66,6 @@ cd frontend
 ng add @angular/material
 ng generate @angular/material:navigation nav
 ng generate @angular/material:dashboard home
-```
-
-I've had a problem with Angular versions, so I've ran: `npm install @angular/material@12.0.2 --force` and add proper css file in `anguar.json`.
-```javascript
-            "styles": [
-              "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
-              "src/styles.css"
-            ],
 ```
 
 You can run it.
@@ -96,7 +91,7 @@ cd backend
 mvn spring-boot:run
 ```
 
-When you open http://localhost:8080/ you will see the login form. User name is "user" and password is generatted and it was printed in log in console. After login you will see the "Whitelabel Error Page".
+When you open http://localhost:8080/ you will see the login form. User name is "user" and password was generated and it was printed in console. After login you will see the "Whitelabel Error Page".
 
 ```
 Using generated security password: 7e1f5805-99b4-4aba-af2e-db2e10deb8b9
@@ -113,12 +108,12 @@ There are configured three diffrent locations:
 
 For development process you should run Angular serwer and Spring Boot serwer as previous and NGINX in docker.
 
-__In this and next steps you have to get porper files from repository!__ 
+__In this and next steps you have to get proper files from the repository!__ 
 
 ```bash
 cd nginx-dev
-docker build -t leliw:nginx-angular-dev .
-docker run -p 80:80 -d --name nginx-angular-dev leliw:nginx-angular-dev
+docker build -t leliw/nginx-angular-dev .
+docker run -p 80:80 -d --name nginx-angular-dev leliw/nginx-angular-dev
 ```
 
 If Angular serwer still working, you will see Angular default page on http://localhost/.
@@ -139,9 +134,59 @@ export const environment = {
 
 ### Frontend
 
-All sources of Angular application are located in fornted/src/app and it is basic path for rest files.
-* Copy app.source.ts
-* Add construtor to app.component.ts
+All sources of Angular application are located in fornted/src/app and it is root for the rest of the files.
+* Generate `app.service.ts`
+```bash
+ng generate service app
+```
+* Add content
+```typescript
+interface Principal {
+  name: string;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AppService {
+
+  authenticated = false;
+
+  constructor(private http: HttpClient) {
+      this.http.get<Principal>(environment.ssoUrl + '/user').subscribe(response => {
+          if (response != null && response['name']) {
+              this.authenticated = true;
+          } else {
+              this.authenticated = false;
+          }
+          console.log(this.authenticated);
+      });
+  }
+
+  authenticate(credentials: { username: string; password: string; }, callback: () => any) {
+      const headers = new HttpHeaders(credentials ? {
+          authorization: 'Basic ' + btoa(credentials.username + ':' + credentials.password)
+      } : {});
+      this.http.get<Principal>(environment.ssoUrl + '/user', { headers: headers }).subscribe(response => {
+          if (response['name']) {
+              this.authenticated = true;
+          } else {
+              this.authenticated = false;
+          }
+          console.log(this.authenticated);
+          return callback && callback();
+      });
+  }
+
+  logout() {
+      this.http.post(environment.ssoUrl + '/logout', {}).subscribe();
+      this.authenticated = false;
+      console.log(this.authenticated);
+  }
+
+}
+```
+* Add construtor to `app.component.ts`
 ```typescript
 constructor(public appService : AppService, public router : Router) {}
 ```
@@ -151,7 +196,11 @@ constructor(public appService : AppService, public router : Router) {}
 <app-nav *ngIf="appService.authenticated === true"></app-nav>
 <div *ngIf="appService.authenticated !== true && appService.authenticated !== false">Wait a moment ...</div>
 ```
-* Copy login component `frontend/src/apps/login' and add it to app.module.ts as well as other required modules
+* Generate login component
+```bash
+ng generate component login
+```
+* Copy login component (`frontend/src/apps/login` directory) and add it to `app.module.ts` as well as other required modules
 ```typescript
 ...
 import { LoginComponent } from './login/login.component';
@@ -186,10 +235,11 @@ import { MatInputModule } from '@angular/material/input';
   providers: [AppService],
 ...
 ```
-On http://localhost:4200/ or http://localhost/ you should see "Wait a moment ..."  (backend still not responding).
+On http://localhost:4200/ or http://localhost/ you should see login component / login form  (backend still not responding).
 
 ### Backend
 
+* Add `@RestController` annotation to main class
 * Add authentication method `user(Principal user)`
 * Change logout URI (default is `/logout`)
 * All URI started with `/api` and `/sso` require authentication and the rest doesn't (Angular static sources)
@@ -226,7 +276,7 @@ After restarting both servers (backend and frontend) you should see login form a
 
 ### Frontend logout, routing and simple navigation
 
-* Add routing path
+* Add routing path in `app-routing.module.ts`
 ```typescript
 const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -254,6 +304,12 @@ const routes: Routes = [
     <router-outlet></router-outlet>
   </mat-sidenav-content>
 </mat-sidenav-container>
+```
+* Move logout icon to right by adding in `nav.component.css`
+```css
+.spacer {
+  flex: 1 1 auto;
+}
 ```
 * Menu links doesn't work so good, but when they are routerLinks it looks better (nav.component.html)
 ```html
@@ -300,7 +356,7 @@ export class AppModule { }
 
 In production environment there is onyl one server. Angular resources are served by Java code as static files.
 
-* Bilding Angular source by Maven. Add pom.xml file in frontend folder with frontend-maven-plugin plugin
+* Bilding Angular source by Maven. Add `pom.xml` file in `frontend` folder with frontend-maven-plugin plugin
 ```xml
             <plugin>
                 <groupId>com.github.eirslett</groupId>
