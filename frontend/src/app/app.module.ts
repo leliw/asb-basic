@@ -51,31 +51,29 @@ export class XhrInterceptor implements HttpInterceptor {
   declarations: [
     AppComponent,
     NavComponent,
-    LoginComponent,
     HomeComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule,
-    FormsModule,
-    ReactiveFormsModule,
     AppRoutingModule,
     BrowserAnimationsModule,
     LayoutModule,
     MatToolbarModule,
     MatButtonModule,
-    MatCardModule,
-    MatFormFieldModule,
     MatSidenavModule,
     MatIconModule,
-    MatInputModule,
     MatListModule,
-    HttpClientModule,
-    HttpClientXsrfModule.withOptions({
-      cookieName: 'XSRF-TOKEN',
-      headerName: 'X-XSRF-TOKEN',
-    }),
     MatGridListModule,
+    MatCardModule,
     MatMenuModule,
+
+    HttpClientModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule
   ],
   providers: [AppService, { provide: HTTP_INTERCEPTORS, useClass: XhrInterceptor, multi: true }],
   bootstrap: [AppComponent]

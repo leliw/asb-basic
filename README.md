@@ -32,7 +32,7 @@ $ ng version
 
 Angular CLI: 12.2.11
 Node: 14.18.1
-Package Manager: npm 8.1.1
+Package Manager: npm 8.1.2
 OS: win32 x64
 
 Angular:
@@ -314,10 +314,8 @@ const routes: Routes = [
 * Menu links doesn't work so good, but when they are routerLinks it looks better (nav.component.html)
 ```html
     <mat-nav-list>
-      <mat-nav-list>
-        <a mat-list-item routerLink="/home">Home</a>
-        <a mat-list-item href="#" *ngIf="appService.authenticated">Link</a>
-      </mat-nav-list>
+      <a mat-list-item routerLink="/home">Home</a>
+      <a mat-list-item href="#" *ngIf="appService.authenticated">Link</a>
     </mat-nav-list>
 ```
 * There is also a problem with browser login form, so disable it (app.modules.ts)
@@ -364,8 +362,8 @@ In production environment there is onyl one server. Angular resources are served
                 <version>1.7.6</version>
                 <configuration>
                     <workingDirectory>./</workingDirectory>
-                    <nodeVersion>v13.12.0</nodeVersion>
-                    <npmVersion>6.14.4</npmVersion>
+                    <nodeVersion>v14.18.1</nodeVersion>
+                    <npmVersion>8.1.2</npmVersion>
                 </configuration>
                 <executions>
                     <execution>
