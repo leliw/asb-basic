@@ -352,7 +352,7 @@ export class AppModule { }
 ```
 ## All together in production environment
 
-In production environment there is onyl one server. Angular resources are served by Java code as static files.
+In production environment there is only one server. Angular resources are served by Java code as static files.
 
 * Bilding Angular source by Maven. Add `pom.xml` file in `frontend` folder with frontend-maven-plugin plugin
 ```xml
